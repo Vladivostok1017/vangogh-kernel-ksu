@@ -1,5 +1,25 @@
 # 发布到远端（GitHub / Gitee / 自建）
 
+## 当前状态（已就绪，只差远端仓库）
+
+- `origin` 已预置为 `git@github.com:Vladivostok1017/vangogh-kernel-ksu.git`
+- 本机 SSH key 已验证可登录 GitHub，身份 `Vladivostok1017`
+  （`ssh -T git@github.com` → `Hi Vladivostok1017! You've successfully authenticated`）
+- 工作区干净，3 个提交，206 个文件，pack 后 180 MiB
+- 该仓库**尚未在 GitHub 上创建**，所以 `git push` 现在报 `ERROR: Repository not found.`
+
+**只差一步**：在 GitHub 网页 New repository → 名字填 `vangogh-kernel-ksu` →
+**不要**勾 README/.gitignore/license → Create。然后：
+
+```bash
+cd F:\vangogh-kernel-ksu
+git push -u origin main
+```
+
+（若想换个仓库名，先 `git remote set-url origin git@github.com:Vladivostok1017/<新名字>.git`。）
+
+---
+
 仓库里已经写好 `.gitignore` 和 `.gitattributes`，`artifacts/` 与 `backup/` 下的二进制
 全部以 `xz` 存放，**最大单文件 65.6 MiB（`modem.img.xz`）**，低于 GitHub 的 100 MiB
 硬限制，因此直接 `git push` 就行，不需要 LFS。
