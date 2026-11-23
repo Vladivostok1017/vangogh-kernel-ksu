@@ -1,0 +1,17 @@
+# 构建产物
+/work/
+/out/
+*.img
+*.img.gz
+boot-ksu.img
+*.zip
+
+# 二进制/APK 不入库（用 Releases 分发）
+*.apk
+
+# 编辑器/系统
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~

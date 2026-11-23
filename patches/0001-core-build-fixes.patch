@@ -1,0 +1,110 @@
+diff --git a/drivers/power/supply/qcom/smb5-lib.h b/drivers/power/supply/qcom/smb5-lib.h
+index fe891216a..6bc49820a 100644
+--- a/drivers/power/supply/qcom/smb5-lib.h
++++ b/drivers/power/supply/qcom/smb5-lib.h
+@@ -808,8 +808,9 @@ struct smb_charger {
+ #ifdef CONFIG_BQ2597X_CHARGE_PUMP
+ 	/* used for bq charge pump solution */
+ 	struct usbpd		*pd;
+-	bool			use_bq_pump;
+ #endif
++	/* declared unconditionally: read outside the BQ guard */
++	bool			use_bq_pump;
+ 
+ 	/* use qcom smb charger_pump */
+ 	bool			use_smb_pump;
+diff --git a/drivers/soc/qcom/msm_bus/msm_bus_core.h b/drivers/soc/qcom/msm_bus/msm_bus_core.h
+index eda2863b0..a6b379fe6 100644
+--- a/drivers/soc/qcom/msm_bus/msm_bus_core.h
++++ b/drivers/soc/qcom/msm_bus/msm_bus_core.h
+@@ -321,7 +321,7 @@ int msm_bus_noc_hw_init(struct msm_bus_fabric_registration *pdata,
+ 	struct msm_bus_hw_algorithm *hw_algo);
+ int msm_bus_bimc_hw_init(struct msm_bus_fabric_registration *pdata,
+ 	struct msm_bus_hw_algorithm *hw_algo);
+-#if 0
++#ifdef CONFIG_DEBUG_FS
+ void msm_bus_dbg_client_data(struct msm_bus_scale_pdata *pdata, int index,
+ 	uint32_t cl);
+ void msm_bus_dbg_commit_data(const char *fabname, void *cdata,
+diff --git a/include/linux/ksu_419_compat.h b/include/linux/ksu_419_compat.h
+new file mode 100644
+index 000000000..855ae235c
+--- /dev/null
++++ b/include/linux/ksu_419_compat.h
+@@ -0,0 +1,43 @@
++/* Compatibility helpers so that SukiSU (written for 5.x+) builds on 4.19.
++ * The *_nofault family only appeared in 5.8; untagged_addr in 5.4. */
++#ifndef _LINUX_KSU_419_COMPAT_H
++#define _LINUX_KSU_419_COMPAT_H
++
++#include <linux/version.h>
++#include <linux/uaccess.h>
++#include <linux/string.h>
++
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 8, 0)
++static inline long ksu_compat_strncpy_from_user_nofault(char *dst,
++		const void __user *src, long count)
++{
++	return strncpy_from_user(dst, src, count);
++}
++static inline long ksu_compat_copy_from_user_nofault(void *dst,
++		const void __user *src, unsigned long size)
++{
++	return copy_from_user(dst, src, size);
++}
++static inline long ksu_compat_copy_to_user_nofault(void __user *dst,
++		const void *src, unsigned long size)
++{
++	return copy_to_user(dst, src, size);
++}
++static inline long ksu_compat_copy_kernel_nofault(void *dst, const void *src,
++		unsigned long size)
++{
++	memcpy(dst, src, size);
++	return 0;
++}
++#define strncpy_from_user_nofault ksu_compat_strncpy_from_user_nofault
++#define copy_from_user_nofault ksu_compat_copy_from_user_nofault
++#define copy_to_user_nofault ksu_compat_copy_to_user_nofault
++#define copy_to_kernel_nofault ksu_compat_copy_kernel_nofault
++#define copy_from_kernel_nofault ksu_compat_copy_kernel_nofault
++#endif /* < 5.8 */
++
++#ifndef untagged_addr
++#define untagged_addr(addr) (addr)
++#endif
++
++#endif
+diff --git a/include/linux/pgtable.h b/include/linux/pgtable.h
+new file mode 100644
+index 000000000..0cf275814
+--- /dev/null
++++ b/include/linux/pgtable.h
+@@ -0,0 +1,6 @@
++/* Compatibility shim for pre-5.0 kernels: linux/pgtable.h was split out of
++ * asm/pgtable.h in Linux 5.x.  Needed by SukiSU. */
++#ifndef _LINUX_PGTABLE_COMPAT_H
++#define _LINUX_PGTABLE_COMPAT_H
++#include <asm/pgtable.h>
++#endif
+diff --git a/kernel/sched/tune.c b/kernel/sched/tune.c
+index 875636e4f..abfc3410c 100644
+--- a/kernel/sched/tune.c
++++ b/kernel/sched/tune.c
+@@ -847,12 +847,16 @@ static struct cftype files[] = {
+ 	{
+ 		.name = "boost",
+ 		.read_s64 = boost_read,
++#ifdef CONFIG_STUNE_ASSIST
+ 		.write_s64 = boost_write_wrapper,
++#endif
+ 	},
+ 	{
+ 		.name = "prefer_idle",
+ 		.read_u64 = prefer_idle_read,
++#ifdef CONFIG_STUNE_ASSIST
+ 		.write_u64 = prefer_idle_write_wrapper,
++#endif
+ 	},
+ 	{
+ 		.name = "prefer_high_cap",

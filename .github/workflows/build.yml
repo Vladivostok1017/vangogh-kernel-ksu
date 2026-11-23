@@ -1,0 +1,57 @@
+name: build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang-14 lld-14 llvm-14 gcc-aarch64-linux-gnu \
+            bc bison flex cpio rsync libssl-dev libelf-dev \
+            python3 make git
+
+      - name: 缓存内核源码树
+        uses: actions/cache@v4
+        with:
+          path: work/kernel
+          key: driftwood-${{ hashFiles('patches/*', 'config/*', 'build.sh') }}-${{ github.sha }}
+          restore-keys: |
+            driftwood-
+
+      - name: 构建
+        run: |
+          chmod +x build.sh
+          ./build.sh
+        env:
+          JOBS: 8
+
+      - name: 校验产物
+        run: |
+          ls -lh out/arch/arm64/boot/Image
+          strings -n 10 out/arch/arm64/boot/Image | grep -m1 "^Linux version"
+          grep -E "^CONFIG_(KSU|QCA_CLD_WLAN|MIHW)=" out/.config
+
+      - name: 上传 Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: Image-ksu-${{ github.sha }}
+          path: out/arch/arm64/boot/Image
+          if-no-files-found: error
+
+      - name: 上传 .config
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-${{ github.sha }}
+          path: out/.config
+          if-no-files-found: warn
