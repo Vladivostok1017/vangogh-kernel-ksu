@@ -4,6 +4,9 @@
 
 > 设备：M2002J9E · SM7250 (lito) · MIUI 13 `V13.0.7.0.SJVCNXM` · Android 12 · 内核 4.19.113 · **非 GKI**
 
+[![release](https://img.shields.io/github/v/release/Vladivostok1017/vangogh-kernel-ksu?label=release)](https://github.com/Vladivostok1017/vangogh-kernel-ksu/releases/latest)
+[![build](https://github.com/Vladivostok1017/vangogh-kernel-ksu/actions/workflows/build.yml/badge.svg)](https://github.com/Vladivostok1017/vangogh-kernel-ksu/actions/workflows/build.yml)
+
 ---
 
 ## 状态
@@ -17,8 +20,9 @@
 | 音频 | ❌ | 见 [Roadmap](#roadmap) |
 | 相机 / 指纹 | ⚠️ 未测 | 依赖 vendor 模块的部分可能受影响 |
 
-**不想自己编译？** 仓库里直接带着实机跑过的镜像和安装包 —— 见
-[开箱即用](#开箱即用仓库自带产物)。
+**不想自己编译？** 直接下成品：**[Releases → v1.0.0](https://github.com/Vladivostok1017/vangogh-kernel-ksu/releases/latest)**
+（boot 镜像、KernelSU 管理器、回滚用的原厂/Magisk boot、`SHA256SUMS.txt`）。
+仓库里也带着同样的产物，见 [开箱即用](#开箱即用仓库自带产物)。
 
 ---
 
