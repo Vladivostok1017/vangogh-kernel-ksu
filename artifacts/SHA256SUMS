@@ -1,0 +1,11 @@
+8384b08fb8c4cf1314fa87aff80839faf284d22eeff41a8319e8eaa1336f1e7b  artifacts/apk/KernelSU_v0.9.5.apk
+1202adb835a64d8b3df703da7884a2966f8728c131cffb29fb5f48d31d81ac85  artifacts/apk/SukiSU_Nova_v3.0.0.apk
+ae901697c5353e9566d749316ba7d83359bba7b8b7f61d4d342e7b616202cb44  artifacts/boot/out-c-experimental.img.xz
+58ce432892e620abbbb2606e919f50311d7d7505ba64733f8fa223b7a8d3e815  artifacts/boot/out-c-experimental.img  (decompressed)
+659866699c0bd693fa5b4fc2a227d662a63c7d94d9439d90474e6a1923de053a  artifacts/boot/out-c2-experimental.img.xz
+8ca9b602cd553adafee4ee3273ef1b959262d44c000de10f3803fac7da259089  artifacts/boot/out-c2-experimental.img  (decompressed)
+236f50846bb6b37612b0647cd067e6181d8b58652c89fe7946c738c1d9ccc80f  artifacts/boot/out-c3-experimental.img.xz
+0c56f44f8dae56044d19ac4bef81887c565283c60b5c511ae62a74b9f8eb9eff  artifacts/boot/out-c3-experimental.img  (decompressed)
+efc3aa9ea44002d24a6de3202447f3e7953adb886d8c9d4e1ba2510cba2a9e18  artifacts/boot/out-c6-working-ksu-0.9.5.img.xz
+ea0f1d17eea387d2c2e049a3aa324cb9dcd559589992a362fe92a67de694f038  artifacts/boot/out-c6-working-ksu-0.9.5.img  (decompressed)
+5813c9b82941aa3d725bd9daa3c839941baed278c9e4dd885ec30c9e35a328c8  artifacts/config/stock_config.gz

@@ -1,16 +1,19 @@
-# 构建产物
+# ---- 构建中间产物 / 临时目录（不入库）----
 /work/
 /out/
-*.img
-*.img.gz
-boot-ksu.img
-*.zip
+/out-*/
+*.log
+*.tmp
+*.o
+*.ko.tmp
 
-# 二进制/APK 不入库（用 Releases 分发）
-*.apk
+# 仓库里随附的 xz 压缩产物例外（见 artifacts/ 与 backup/）
+!/artifacts/**
+!/backup/**
 
-# 编辑器/系统
+# ---- 编辑器 / 系统噪声 ----
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
 *.swp

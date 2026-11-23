@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+K="$HOME/work/driftwood"
+rm -f "$K/drivers/kernelsu"
+ln -sfn "$K/SukiSU/kernel" "$K/drivers/kernelsu"
+echo "link -> $(readlink -f "$K/drivers/kernelsu")"
+F="$K/SukiSU/kernel/infra/file_wrapper.c"
+echo "=== 100-115 ==="
+sed -n '100,115p' "$F"
+echo "=== 305-330 ==="
+sed -n '305,330p' "$F"
+echo "=== 440-465 ==="
+sed -n '440,465p' "$F"

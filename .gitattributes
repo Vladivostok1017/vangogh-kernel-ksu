@@ -16,8 +16,18 @@ LICENSE   text eol=lf
 *.bat     text eol=crlf
 *.cmd     text eol=crlf
 
-# 二进制
+# 二进制：禁止任何换行符转换，否则 sha256 会变、镜像刷不进去
 *.img     binary
+*.img.xz  binary
 *.gz      binary
+*.xz      binary
 *.apk     binary
 *.zip     binary
+*.ko      binary
+*.elf     binary
+*.bin     binary
+
+# 大体积压缩产物标记为不可合并、不可 diff（仓库自带 ~190 MiB 产物）
+artifacts/** -merge -diff
+backup/**    -merge -diff
+

@@ -17,6 +17,35 @@
 | 音频 | ❌ | 见 [Roadmap](#roadmap) |
 | 相机 / 指纹 | ⚠️ 未测 | 依赖 vendor 模块的部分可能受影响 |
 
+**不想自己编译？** 仓库里直接带着实机跑过的镜像和安装包 —— 见
+[开箱即用](#开箱即用仓库自带产物)。
+
+---
+
+## 开箱即用：仓库自带产物
+
+```
+artifacts/boot/out-c6-working-ksu-0.9.5.img.xz    ← 可刷的那个（解压后 128 MiB）
+artifacts/apk/KernelSU_v0.9.5.apk                 ← 必须用这个版本的管理器
+backup/boot/stock-v13.0.7.0.img.xz                ← 回滚用原厂 boot
+backup/boot/magisk-patched-boot.img.xz            ← 回滚到"原厂 + Magisk"
+backup/{partitions,firmware,ko}/                  ← 刷机前的设备原始备份
+```
+
+```bash
+xz -dk artifacts/boot/out-c6-working-ksu-0.9.5.img.xz
+sha256sum -c artifacts/SHA256SUMS     # 摘要同时记录压缩包与解压后两种
+fastboot boot out-c6-working-ksu-0.9.5.img   # 先临时启动验证，不写分区
+```
+
+逐文件说明、sha256 全表、每个 `backup/` 分区是干什么的，分别在
+[`artifacts/README.md`](artifacts/README.md) 和 [`backup/README.md`](backup/README.md)。
+仓库自带约 190 MiB 二进制（压缩后），克隆会比较慢，`git clone --depth 1` 可缓解。
+
+> `backup/` 里是**这台设备**的原始数据（`persist`、`modemst1/2`、`fsg`、`sec`、
+> `devinfo` 等），属于不可再生资产。仓库完整保留以便救援与复现；如果要 fork 后
+> 公开分发，建议自行评估是否保留这几项。
+
 ---
 
 ## 为什么这个项目存在
@@ -103,8 +132,13 @@ scripts/
   device-backup-partitions.sh            # 备份 EFS/关键分区（需 root）
   device-backup-firmware.sh              # 备份引导链/固件分区（需 root）
   boottest.ps1                           # Windows 侧一键 boot 测试
+  release-artifacts.py                   # 把设备产物压缩归档进仓库（生成 SHA256SUMS）
+  setup/                                 # 这次适配全过程用到的 138 个构建/诊断脚本
+artifacts/                               # 实机产物：boot 镜像、管理器 APK、原厂 config
+backup/                                  # 刷机前的分区/固件/模块备份（不可再生）
 docs/
   HANDOFF.md                             # 完整技术交接：结论、证据、卡点、下一步
+  PUBLISH.md                             # 推到 GitHub/Gitee 的完整步骤（含 190 MiB 大仓库处理）
 build.sh
 ```
 
