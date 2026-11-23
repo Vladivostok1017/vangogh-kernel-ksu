@@ -29,7 +29,7 @@ artifacts/boot/out-c6-working-ksu-0.9.5.img.xz    ← 可刷的那个（解压�
 artifacts/apk/KernelSU_v0.9.5.apk                 ← 必须用这个版本的管理器
 backup/boot/stock-v13.0.7.0.img.xz                ← 回滚用原厂 boot
 backup/boot/magisk-patched-boot.img.xz            ← 回滚到"原厂 + Magisk"
-backup/{partitions,firmware,ko}/                  ← 刷机前的设备原始备份
+backup/{partitions,firmware,ko}/                  ← 分区/固件/模块备份
 ```
 
 ```bash
@@ -40,11 +40,12 @@ fastboot boot out-c6-working-ksu-0.9.5.img   # 先临时启动验证，不写分
 
 逐文件说明、sha256 全表、每个 `backup/` 分区是干什么的，分别在
 [`artifacts/README.md`](artifacts/README.md) 和 [`backup/README.md`](backup/README.md)。
-仓库自带约 190 MiB 二进制（压缩后），克隆会比较慢，`git clone --depth 1` 可缓解。
+仓库自带约 178 MiB 二进制（压缩后），克隆会比较慢，`git clone --depth 1` 可缓解。
 
-> `backup/` 里是**这台设备**的原始数据（`persist`、`modemst1/2`、`fsg`、`sec`、
-> `devinfo` 等），属于不可再生资产。仓库完整保留以便救援与复现；如果要 fork 后
-> 公开分发，建议自行评估是否保留这几项。
+> `persist`、`modemst1/2`、`fsg` 这四个分区**不随仓库发布** —— 里面是这台设备的
+> Wi-Fi MAC、指纹/传感器/功光标定、MI 账号 ID、FIDO·MiPay·Widevine 密钥材料和 IMEI。
+> 它们只留在本机备份里，需要时可 `python3 scripts/release-artifacts.py --include-identity`
+> 单独导出。原因与逐项说明见 [`backup/README.md`](backup/README.md)。
 
 ---
 
@@ -138,7 +139,7 @@ artifacts/                               # 实机产物：boot 镜像、管理�
 backup/                                  # 刷机前的分区/固件/模块备份（不可再生）
 docs/
   HANDOFF.md                             # 完整技术交接：结论、证据、卡点、下一步
-  PUBLISH.md                             # 推到 GitHub/Gitee 的完整步骤（含 190 MiB 大仓库处理）
+  PUBLISH.md                             # 推到 GitHub/Gitee 的完整步骤（含大仓库推送处理）
 build.sh
 ```
 

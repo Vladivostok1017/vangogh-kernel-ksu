@@ -50,15 +50,11 @@ JOBS: list[tuple[str, str, bool]] = [
     # --- stock / magisk boot backups ---
     ("backup/boot-stock-v13.0.7.0.img", "backup/boot/stock-v13.0.7.0.img.xz", True),
     ("backup/partitions/bk-partitions/boot.img", "backup/boot/magisk-patched-boot.img.xz", True),
-    # --- partition table backups (device-unique, irreplaceable) ---
+    # --- partition table backups ---
     ("backup/partitions/bk-partitions/devcfg.img", "backup/partitions/devcfg.img.xz", True),
     ("backup/partitions/bk-partitions/devinfo.img", "backup/partitions/devinfo.img.xz", True),
     ("backup/partitions/bk-partitions/dtbo.img", "backup/partitions/dtbo.img.xz", True),
-    ("backup/partitions/bk-partitions/fsg.img", "backup/partitions/fsg.img.xz", True),
     ("backup/partitions/bk-partitions/misc.img", "backup/partitions/misc.img.xz", True),
-    ("backup/partitions/bk-partitions/modemst1.img", "backup/partitions/modemst1.img.xz", True),
-    ("backup/partitions/bk-partitions/modemst2.img", "backup/partitions/modemst2.img.xz", True),
-    ("backup/partitions/bk-partitions/persist.img", "backup/partitions/persist.img.xz", True),
     ("backup/partitions/bk-partitions/sec.img", "backup/partitions/sec.img.xz", True),
     ("backup/partitions/bk-partitions/vbmeta.img", "backup/partitions/vbmeta.img.xz", True),
     # --- firmware backups ---
@@ -91,6 +87,20 @@ JOBS: list[tuple[str, str, bool]] = [
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFEST = os.path.join(REPO, "artifacts", "pack-manifest.json")
+
+# 故意**不**入仓的四个分区：内容是本机的身份数据，不进公开历史
+#   persist.img    Wi-Fi MAC / 指纹与传感器标定 / MI 账号 ID 与 FIDO·MiPay·Widevine 密钥
+#   modemst1.img   EFS2 的 IMEI、射频校准、SIM 锁
+#   modemst2.img   同上（第二份）
+#   fsg.img        出厂 golden copy，可把上面两个恢复回出厂态
+# 需要时用 --include-identity 在本机导出（默认不导出）。
+IDENTITY_EXCLUDED = [
+    ("backup/partitions/bk-partitions/persist.img", "backup/partitions/persist.img.xz"),
+    ("backup/partitions/bk-partitions/modemst1.img", "backup/partitions/modemst1.img.xz"),
+    ("backup/partitions/bk-partitions/modemst2.img", "backup/partitions/modemst2.img.xz"),
+    ("backup/partitions/bk-partitions/fsg.img", "backup/partitions/fsg.img.xz"),
+]
+
 
 
 def sha256_file(path: str, chunk: int = 1 << 20) -> str:
@@ -158,7 +168,16 @@ def main() -> int:
     ap.add_argument("--jobs", type=int, default=min(8, os.cpu_count() or 4))
     ap.add_argument("--preset", type=int, default=6)
     ap.add_argument("--force", action="store_true")
+    ap.add_argument(
+        "--include-identity",
+        action="store_true",
+        help="同时导出 persist/modemst1/modemst2/fsg（含 IMEI、MAC、支付密钥，只在本机留档用）",
+    )
     args = ap.parse_args()
+
+    jobs = list(JOBS)
+    if args.include_identity:
+        jobs += [(s, d, True) for s, d in IDENTITY_EXCLUDED]
 
     SRC_ROOT, FORCE, PRESET = args.src, args.force, args.preset
     MANIFEST_CACHE = {}
@@ -174,10 +193,13 @@ def main() -> int:
         print(f"source root not found: {SRC_ROOT}", file=sys.stderr)
         return 2
 
-    print(f"src={SRC_ROOT}  jobs={args.jobs}  preset={args.preset}  entries={len(JOBS)}")
+    print(f"src={SRC_ROOT}  jobs={args.jobs}  preset={args.preset}  entries={len(jobs)}")
+    if not args.include_identity:
+        print(f"身份数据不入仓（{len(IDENTITY_EXCLUDED)} 个分区跳过）："
+              + ", ".join(os.path.basename(s) for s, _ in IDENTITY_EXCLUDED))
     results = []
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
-        for res in pool.map(pack, JOBS):
+        for res in pool.map(pack, jobs):
             results.append(res)
             if res["status"] == "packed":
                 print(
@@ -191,7 +213,8 @@ def main() -> int:
 
     os.makedirs(os.path.dirname(MANIFEST), exist_ok=True)
     merged = {f"{e['src']}|{e['dst']}": e for e in results if e["status"] in ("packed", "cached")}
-    merged.update({k: v for k, v in MANIFEST_CACHE.items() if k not in merged})
+    merged.update({k: v for k, v in MANIFEST_CACHE.items()
+                   if k not in merged and k.split("|", 1)[1] in {d for _, d, _ in jobs}})
     with open(MANIFEST, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(sorted(merged.values(), key=lambda e: e["dst"]), fh, indent=2)
         fh.write("\n")
