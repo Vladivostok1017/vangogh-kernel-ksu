@@ -39,23 +39,38 @@ done
 log() { printf '\033[1;32m==>\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 
-# ---------------------------------------------------------------- 依赖检查
-log "检查依赖"
-for t in clang ld.lld make python3 bc bison flex cpio rsync git aarch64-linux-gnu-gcc; do
-  command -v "$t" >/dev/null 2>&1 || die "缺少依赖: $t（Debian/Ubuntu: apt install clang-14 lld-14 llvm-14 gcc-aarch64-linux-gnu bc bison flex cpio rsync libssl-dev libelf-dev）"
-done
-
-# 该内核树使用 CC=clang，需要 clang/ld.lld 可被 make 直接调用
+log "准备编译器"
 mkdir -p "$WORK/toolbin"
-for pair in clang:clang-14 ld.lld:ld.lld-14 llvm-ar:llvm-ar-14 llvm-nm:llvm-nm-14 \
-            llvm-objcopy:llvm-objcopy-14 llvm-objdump:llvm-objdump-14 \
-            llvm-strip:llvm-strip-14 llvm-readelf:llvm-readelf-14 llvm-size:llvm-size-14; do
-  n="${pair%%:*}"; t="${pair##*:}"
-  if ! command -v "$n" >/dev/null 2>&1 && command -v "$t" >/dev/null 2>&1; then
-    ln -sf "$(command -v "$t")" "$WORK/toolbin/$n"
-  fi
+
+# Ubuntu/Debian 的 clang-14/lld-14 只提供带版本号的二进制（clang-14、ld.lld-14、
+# llvm-ar-14…），不带版本号的 clang / ld.lld 属于 meta 包 clang / lld。
+# 而 kbuild 在 LLVM=1 下调用的是不带版本号的名字，所以先在 work/toolbin 里补一层软链，
+# 再检查依赖 —— 顺序反了会在裸机上直接报“缺少依赖: clang”。
+pick() {
+  name="$1"; shift
+  if command -v "$name" >/dev/null 2>&1; then return 0; fi
+  for cand in "$@"; do
+    if command -v "$cand" >/dev/null 2>&1; then
+      ln -sf "$(command -v "$cand")" "$WORK/toolbin/$name"
+      return 0
+    fi
+  done
+  return 1
+}
+VERS="21 20 19 18 17 16 15 14 13 12"
+for n in clang ld.lld llvm-ar llvm-nm llvm-objcopy llvm-objdump \
+         llvm-strip llvm-readelf llvm-size llvm-ranlib; do
+  cands=""
+  for v in $VERS; do cands="$cands $n-$v"; done
+  pick "$n" $cands || true      # 建不起来就让下面的依赖检查去报错
 done
 export PATH="$WORK/toolbin:$PATH"
+
+# ---------------------------------------------------------------- 依赖检查
+log "检查依赖"
+for t in clang ld.lld llvm-ar make python3 bc bison flex cpio rsync git aarch64-linux-gnu-gcc; do
+  command -v "$t" >/dev/null 2>&1 || die "缺少依赖: $t（Debian/Ubuntu: apt install clang-14 lld-14 llvm-14 gcc-aarch64-linux-gnu bc bison flex cpio rsync libssl-dev libelf-dev）"
+done
 
 # ---------------------------------------------------------------- 源码
 mkdir -p "$WORK"

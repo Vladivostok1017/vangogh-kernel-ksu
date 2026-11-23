@@ -17,14 +17,25 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            clang-14 lld-14 llvm-14 gcc-aarch64-linux-gnu \
+            clang-14 lld-14 llvm-14 clang lld gcc-aarch64-linux-gnu \
             bc bison flex cpio rsync libssl-dev libelf-dev \
-            python3 make git
+            python3 perl make git xz-utils
+
+      - name: 检查工具链
+        run: |
+          set -x
+          for t in clang-14 ld.lld-14 llvm-ar-14 llvm-nm-14 llvm-strip-14 \
+                   aarch64-linux-gnu-gcc bc bison flex cpio; do
+            command -v "$t" || { echo "missing: $t"; exit 1; }
+          done
+          clang-14 --version | head -1
 
       - name: 缓存内核源码树
         uses: actions/cache@v4
         with:
-          path: work/kernel
+          path: |
+            work/kernel
+            work/KernelSU
           key: driftwood-${{ hashFiles('patches/*', 'config/*', 'build.sh') }}-${{ github.sha }}
           restore-keys: |
             driftwood-
@@ -32,7 +43,8 @@ jobs:
       - name: 构建
         run: |
           chmod +x build.sh
-          ./build.sh
+          ./build.sh 2>&1 | tee build.log
+          test -f out/arch/arm64/boot/Image
         env:
           JOBS: 8
 
@@ -54,4 +66,13 @@ jobs:
         with:
           name: config-${{ github.sha }}
           path: out/.config
+          if-no-files-found: warn
+
+      # 失败时也要拿到日志，否则只能看到 "exit code 1"
+      - name: 上传构建日志（失败时）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.sha }}
+          path: build.log
           if-no-files-found: warn
