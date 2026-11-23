@@ -1,4 +1,5 @@
 #!/system/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
 # 备份 PE13 安装脚本会覆盖的全部固件/引导分区（不可恢复）
 D=/sdcard/bk-firmware
 mkdir -p "$D"

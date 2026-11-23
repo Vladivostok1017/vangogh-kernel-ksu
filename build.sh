@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # vangogh-kernel-ksu — 一键构建：为小米10青春版 (vangogh) 的 MIUI 13 构建带 KernelSU 的内核
 #

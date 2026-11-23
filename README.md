@@ -275,9 +275,17 @@ python3 scripts/release-artifacts.py --include-identity
 
 ## 许可证
 
-- 仓库内脚本与文档：MIT（见 [`LICENSE`](LICENSE)）
-- 内核补丁：遵循被修改源码的许可，GPL-2.0
-- 内核源码版权归各自所有者（Xiaomi、Qualcomm、Linux 基金会等）
+本项目整体以 **GNU General Public License v2.0**（`GPL-2.0-only`）发布，全文见 [`LICENSE`](LICENSE)。
+
+- `patches/` 内的补丁修改的是 Linux 内核源码（GPL-2.0），沿用同一许可
+- 构建脚本、辅助脚本、文档与配置同样以 GPL-2.0 发布；各文件头部标注
+  `SPDX-License-Identifier: GPL-2.0-only`
+- `artifacts/` 与 `backup/` 中的二进制产物不适用本仓库许可，其权利与许可归各自权利人：
+  - boot 镜像包含 Linux 内核（GPL-2.0）与 Xiaomi / Qualcomm 厂商组件（按原厂条款）
+  - `KernelSU_v0.9.5.apk` 来自 [KernelSU](https://github.com/tiann/KernelSU) 项目（GPL-3.0）
+  - 分区与固件备份为设备原始数据
+
+分发修改后的版本时，请保留本仓库的版权声明并同样以 GPL-2.0 提供完整对应源码。
 
 ## 致谢
 

@@ -1,4 +1,5 @@
 #!/system/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
 # 在设备上以 root 运行：备份不可恢复分区
 set -u
 D=/sdcard/bk-partitions

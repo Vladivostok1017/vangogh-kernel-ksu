@@ -1,4 +1,5 @@
 #!/system/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
 echo "=== pstore 文件 ==="
 ls -l /sys/fs/pstore/ 2>&1
 echo

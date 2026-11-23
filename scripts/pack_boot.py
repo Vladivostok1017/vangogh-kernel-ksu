@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 """
 Pack an Android boot image (header v0-v2) by reusing the stock image's header
 verbatim and swapping the kernel payload.

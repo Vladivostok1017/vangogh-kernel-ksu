@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# SPDX-License-Identifier: GPL-2.0-only
 # boottest.ps1 - 用 fastboot 临时启动指定内核镜像并回报结果
 # 用法: .\boottest.ps1 -Image F:\vanilla-build\out\boot-xxx.img [-Wait 60]
 param(

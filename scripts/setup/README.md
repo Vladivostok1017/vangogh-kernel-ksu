@@ -38,3 +38,8 @@
 - 改完 `vendor/vangogh_user_defconfig` 必须重跑该 defconfig（`olddefconfig` 只读 `.config`）。
 - 生成的 `config/*autoconf.h` 不能包含整份 `.config`，否则与内核 `autoconf.h` 冲突
   （`redefinition of 'snd_event_notify'`）。
+
+---
+
+本目录下的全部脚本与 docs/、scripts/ 其余内容一样，以 GPL-2.0（GPL-2.0-only）发布，见仓库根目录 [`LICENSE`](../../LICENSE)。
+
